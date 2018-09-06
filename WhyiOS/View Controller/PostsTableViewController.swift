@@ -70,9 +70,10 @@ class PostsTableViewController: UITableViewController {
             let cohortText = reasonAlert.textFields?[1].text ?? ""
             guard let reasonText = reasonAlert.textFields?[2].text else { return }
          
-            PostController.shared.postReason(name: nameText, reason: reasonText, cohort: cohortText, completion: { (true) in
+            PostController.shared.putPost(name: nameText, reason: reasonText, completion: { (true) in
                 
             })
+            
             self.tableView.reloadData()
         }
         let dismissAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)

@@ -51,41 +51,73 @@ class PostController {
         }.resume()
     }
     
-    func postReason(name: String, reason: String, cohort: String, completion: @escaping (_ success: Bool) -> Void) {
+    func putPost(name: String, reason: String, completion: @escaping (_ success: Bool) -> Void){
+        let post = Post(name: name, reason: reason)
+        guard let url = PostController.baseURL else {fatalError("bad baseURL")}
+        let builtURL = url.appendingPathComponent(post.uuid).appendingPathExtension("json")
+        var request = URLRequest(url: builtURL)
         
-        guard let url = PostController.baseURL?.appendingPathComponent("reasons").appendingPathExtension("json") else {
-            completion(false); return
-        }
-        // Print URL for PUT request
-        print(url)
-        
-         let requestURL = url.appendingPathComponent("reasons").appendingPathExtension("json")
-        
-        let post = Post(cohort: cohort, name: name, reason: reason)
-        
-        var request = URLRequest(url: requestURL)
-    
         let jsonEncoder = JSONEncoder()
-        do {
+        do{
             let data = try jsonEncoder.encode(post)
             request.httpMethod = "PUT"
             request.httpBody = data
-        } catch let error {
-            print("Error with JSONEncoder for post: \(error) \(error.localizedDescription)")
+        }catch let error {
+            print("🤮 Error putting with data task: \(error) \(error.localizedDescription)")
+            completion(false); return
         }
         
         URLSession.shared.dataTask(with: request) { (data, _, error) in
-            
             if let error = error {
-                print("Error with PUT request: \(error) \(error.localizedDescription)")
+                print("🤮 Error Fetching with data task: \(error) \(error.localizedDescription)")
+                completion(false); return
             }
-            
-            guard let data = data, let responseString = String(data: data, encoding: .utf8) else { completion(false); return }
+            //for me
+            guard let data = data,
+                let responseString = String(data: data, encoding: .utf8) else {completion(false); return}
             print(responseString)
             
-            self.posts.append(post)
+            //connect the local array to the instances in the cloud or wherever
+            PostController.shared.posts.append(post)
             completion(true)
-            
-        }.resume()
+            }.resume()
     }
+    
+//    func postReason(name: String, reason: String, completion: @escaping (_ success: Bool) -> Void) {
+//
+//        guard let url = PostController.baseURL?.appendingPathComponent("reasons").appendingPathExtension("json") else {
+//            completion(false); return
+//        }
+//        // Print URL for PUT request
+//        print(url)
+//
+//         let requestURL = url.appendingPathComponent("reasons").appendingPathExtension("json")
+//
+//        let post = Post(name: name, reason: reason)
+//
+//        var request = URLRequest(url: requestURL)
+//
+//        let jsonEncoder = JSONEncoder()
+//        do {
+//            let data = try jsonEncoder.encode(post)
+//            request.httpMethod = "PUT"
+//            request.httpBody = data
+//        } catch let error {
+//            print("Error with JSONEncoder for post: \(error) \(error.localizedDescription)")
+//        }
+//
+//        URLSession.shared.dataTask(with: request) { (data, _, error) in
+//
+//            if let error = error {
+//                print("Error with PUT request: \(error) \(error.localizedDescription)")
+//            }
+//
+//            guard let data = data, let responseString = String(data: data, encoding: .utf8) else { completion(false); return }
+//            print(responseString)
+//
+//            self.posts.append(post)
+//            completion(true)
+//
+//        }.resume()
+//    }
 }
